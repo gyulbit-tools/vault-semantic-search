@@ -1,0 +1,4 @@
+{
+  "model_dir": "models/multilingual-e5-small/onnx",
+  "model_name": "intfloat/multilingual-e5-small"
+}

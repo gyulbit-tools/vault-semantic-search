@@ -4,21 +4,21 @@ Obsidian 볼트 같은 Markdown 노트 폴더를 뜻으로 찾는 로컬 검색 
 
 [English README](README.md)
 
-꾸민 노트 세 개로 해 봤어요. `Printer fix.md`와 `Coffee budget.md`는 영어, `산책 기록.md`는 한국어로 썼어요. 한국어로 물으면 영어 노트를, 영어로 물으면 한국어 노트를 찾아요(실제 출력에서 순위 줄만 남김).
+[`demo-vault/`](demo-vault)의 꾸민 노트 세 개로 해 봤어요. `Printer fix.md`와 `Coffee budget.md`는 영어, `산책 기록.md`는 한국어로 썼어요. 한국어로 물으면 영어 노트를, 영어로 물으면 한국어 노트를 찾아요. 아래는 [예제 돌려 보기](#예제-돌려-보기)의 명령을 실제로 돌린 출력에서 순위 줄만 남긴 것이에요.
 
 ```text
-$ python -I -B vault_search.py search demo-vault "프린터 종이 걸림"
-1. [[Printer fix]] (similarity 0.83)
-2. [[산책 기록]] (similarity 0.77)
-3. [[Coffee budget]] (similarity 0.69)
+$ python -I -B vault_search.py search demo-vault "프린터 종이 걸림" --config examples/demo-model.json
+1. [[Printer fix]] › Printer fix (similarity 0.81)
+2. [[산책 기록]] › 산책 기록 (similarity 0.79)
+3. [[Coffee budget]] › Coffee budget (similarity 0.68)
 
-$ python -I -B vault_search.py search demo-vault "walking in the park"
-1. [[산책 기록]] (similarity 0.78)
-2. [[Printer fix]] (similarity 0.76)
-3. [[Coffee budget]] (similarity 0.70)
+$ python -I -B vault_search.py search demo-vault "walking in the park" --config examples/demo-model.json
+1. [[산책 기록]] › 산책 기록 (similarity 0.77)
+2. [[Printer fix]] › Printer fix (similarity 0.75)
+3. [[Coffee budget]] › Coffee budget (similarity 0.70)
 ```
 
-점수는 한 번의 검색 안에서 순서를 정할 뿐이고, 얼마나 확실한지를 뜻하지 않아요.
+점수는 한 번의 검색 안에서 순서를 정할 뿐이고, 얼마나 확실한지를 뜻하지 않아요. 짧은 노트 세 개뿐이라 차이가 작아요(위에서 0.81과 0.79). 모델 판이나 컴퓨터가 다르면 소수 둘째 자리가 달라질 수 있어요.
 
 ## 문제
 
@@ -67,10 +67,21 @@ python -m pip install -r requirements.txt
 
 ```sh
 python -m pip install -U huggingface_hub
-hf download intfloat/multilingual-e5-small onnx/model.onnx onnx/tokenizer.json --local-dir models/multilingual-e5-small
+hf download intfloat/multilingual-e5-small onnx/model.onnx onnx/tokenizer.json --revision 614241f6 --local-dir models/multilingual-e5-small
 ```
 
-`model.onnx`와 `tokenizer.json`이 든 폴더(여기서는 `models/multilingual-e5-small/onnx`)가 `model_dir`이에요. 도구는 두 파일이 있는지만 보고 해시는 확인하지 않아요. 모델 판을 고정하려면 받을 때 `--revision`을 주세요. 이 초안은 리비전 `614241f6`의 파일로 시험했어요.
+`model.onnx`와 `tokenizer.json`이 든 폴더(여기서는 `models/multilingual-e5-small/onnx`)가 `model_dir`이에요. 도구는 두 파일이 있는지만 보고 해시는 확인하지 않아요. `--revision 614241f6`은 이 초안을 시험한 파일로 판을 고정해요. 빼면 최신 파일을 받아요.
+
+### 예제 돌려 보기
+
+[`examples/demo-model.json`](examples/demo-model.json)은 `model_dir`을 위에서 받은 폴더 `models/multilingual-e5-small/onnx`로 정해요. 상대 경로 `model_dir`은 명령을 돌리는 폴더 기준으로 읽으니, 저장소 루트에서 돌리세요(아니면 `model_dir`에 절대 경로를 넣으세요).
+
+```sh
+python -I -B vault_search.py search demo-vault "프린터 종이 걸림" --config examples/demo-model.json
+python -I -B vault_search.py search demo-vault "walking in the park" --config examples/demo-model.json
+```
+
+처음 돌리면 노트 세 개를 임베딩해서 캐시 폴더에 둬요(아래 `cache_dir` 참고). 출력은 질문과 `SEARCH_COMPLETE` 줄로 시작하고, 이어서 노트 세 개가 섹션 제목, 글 조각과 함께 나와요. 순위 줄은 이 README 맨 위와 같아요. `SEARCH_MODEL_UNAVAILABLE`로 멈추면 `model_dir`이 `model.onnx`와 `tokenizer.json`이 든 폴더를 가리키지 않는 거예요.
 
 ## 설정
 
