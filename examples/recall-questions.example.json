@@ -1,0 +1,25 @@
+{
+  "scopes": ["Projects", "Journal", "Recipes"],
+  "questions": [
+    {
+      "id": "q01",
+      "query": "how long does the watering run before the sun comes up",
+      "gold": ["Projects/Garden irrigation.md"]
+    },
+    {
+      "id": "q02",
+      "query": "what did I do on the first day at the seaside",
+      "gold": ["Journal/Spring trip.md"]
+    },
+    {
+      "id": "q03",
+      "query": "두부를 넣는 매운 국물 요리 만드는 순서",
+      "gold": ["Recipes/Kimchi stew.md"]
+    },
+    {
+      "id": "q04",
+      "query": "stopping power got weak on my bike",
+      "gold": ["Projects/Bicycle repair.md", "Journal/Bike shop visit.md"]
+    }
+  ]
+}
