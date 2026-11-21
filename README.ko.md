@@ -4,6 +4,22 @@ Obsidian 볼트 같은 Markdown 노트 폴더를 뜻으로 찾는 로컬 검색 
 
 [English README](README.md)
 
+꾸민 노트 세 개로 해 봤어요. `Printer fix.md`와 `Coffee budget.md`는 영어, `산책 기록.md`는 한국어로 썼어요. 한국어로 물으면 영어 노트를, 영어로 물으면 한국어 노트를 찾아요(실제 출력에서 순위 줄만 남김).
+
+```text
+$ python -I -B vault_search.py search demo-vault "프린터 종이 걸림"
+1. [[Printer fix]] (similarity 0.83)
+2. [[산책 기록]] (similarity 0.77)
+3. [[Coffee budget]] (similarity 0.69)
+
+$ python -I -B vault_search.py search demo-vault "walking in the park"
+1. [[산책 기록]] (similarity 0.78)
+2. [[Printer fix]] (similarity 0.76)
+3. [[Coffee budget]] (similarity 0.70)
+```
+
+점수는 한 번의 검색 안에서 순서를 정할 뿐이고, 얼마나 확실한지를 뜻하지 않아요.
+
 ## 문제
 
 낱말 검색(grep, Obsidian 검색창)은 노트에 쓴 낱말을 기억할 때만 노트를 찾아요. 몇 달 뒤에는 무슨 내용이었는지는 기억해도 어떻게 썼는지는 잊어요. 「해 뜨기 전에 물 주기가 얼마나 돌지」라고 물어도 노트에는 「점적 호스가 매일 아침 20분 돈다」라고 적혀 있어요. 노트로 질문에 답하는 에이전트도 같아서, grep이 몇 번 빗나가면 「기록이 없다」고 답하기 쉬워요.
