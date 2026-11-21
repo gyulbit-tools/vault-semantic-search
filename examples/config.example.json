@@ -1,0 +1,14 @@
+{
+  "model_dir": "C:/models/multilingual-e5-small/onnx",
+  "model_name": "intfloat/multilingual-e5-small",
+  "exclude_dirs": ["Archive", "Templates", "/Attachments", "Backups/*"],
+  "private_dirs": ["Private"],
+  "hide_snippets_when": [
+    { "field": "private", "values": ["true"] },
+    { "field": "sensitivity", "allow": ["low", "medium"] }
+  ],
+  "term_fields": ["aliases", "alias", "keywords"],
+  "pin_field": "featured",
+  "label_fields": ["type", "updated"],
+  "require_scope_for_paths": false
+}
