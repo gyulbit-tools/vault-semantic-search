@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Model files are downloaded by each user, never committed
+models/
+*.onnx
+
+# Embedding cache and atomic-write leftovers, if cache_dir points here
+*.npz
+*.tmp
+
+# Local settings and personal question sets
+config.json
+.vault-search.json
+*questions*.json
+!examples/*.json
+
+# OS and editor
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+.idea/
