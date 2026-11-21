@@ -4,6 +4,22 @@ Local semantic search for a folder of Markdown notes, such as an Obsidian vault.
 
 [한국어 README](README.ko.md)
 
+Three made-up notes: `Printer fix.md` and `Coffee budget.md` are written in English, `산책 기록.md` ("walk log") in Korean. A Korean question finds the English note, and an English question finds the Korean one (real output, shortened to the ranked lines):
+
+```text
+$ python -I -B vault_search.py search demo-vault "프린터 종이 걸림"      # "printer paper jam"
+1. [[Printer fix]] (similarity 0.83)
+2. [[산책 기록]] (similarity 0.77)
+3. [[Coffee budget]] (similarity 0.69)
+
+$ python -I -B vault_search.py search demo-vault "walking in the park"
+1. [[산책 기록]] (similarity 0.78)
+2. [[Printer fix]] (similarity 0.76)
+3. [[Coffee budget]] (similarity 0.70)
+```
+
+Scores only order the notes of one search; they are not a measure of certainty.
+
 ## The problem
 
 A keyword search (grep, the Obsidian search box) finds a note only when you remember the words it uses. Months later you remember what it was about, not how you wrote it: you ask "how long does the watering run before sunrise" and the note says "the drip line runs for twenty minutes every morning". An agent that answers questions from your notes has the same problem, and it tends to give up after a few grep misses and say there is nothing.
