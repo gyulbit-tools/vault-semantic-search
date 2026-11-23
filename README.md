@@ -4,21 +4,21 @@ Local semantic search for a folder of Markdown notes, such as an Obsidian vault.
 
 [한국어 README](README.ko.md)
 
-Three made-up notes in [`demo-vault/`](demo-vault): `Printer fix.md` and `Coffee budget.md` are written in English, `산책 기록.md` ("walk log") in Korean. A Korean question finds the English note, and an English question finds the Korean one. This is real output of the commands in [Try the demo](#try-the-demo), shortened to the ranked lines:
+Three made-up notes: `Printer fix.md` and `Coffee budget.md` are written in English, `산책 기록.md` ("walk log") in Korean. A Korean question finds the English note, and an English question finds the Korean one (real output, shortened to the ranked lines):
 
 ```text
-$ python -I -B vault_search.py search demo-vault "프린터 종이 걸림" --config examples/demo-model.json    # "printer paper jam"
-1. [[Printer fix]] › Printer fix (similarity 0.81)
-2. [[산책 기록]] › 산책 기록 (similarity 0.79)
-3. [[Coffee budget]] › Coffee budget (similarity 0.68)
+$ python -I -B vault_search.py search demo-vault "프린터 종이 걸림"      # "printer paper jam"
+1. [[Printer fix]] (similarity 0.83)
+2. [[산책 기록]] (similarity 0.77)
+3. [[Coffee budget]] (similarity 0.69)
 
-$ python -I -B vault_search.py search demo-vault "walking in the park" --config examples/demo-model.json
-1. [[산책 기록]] › 산책 기록 (similarity 0.77)
-2. [[Printer fix]] › Printer fix (similarity 0.75)
-3. [[Coffee budget]] › Coffee budget (similarity 0.70)
+$ python -I -B vault_search.py search demo-vault "walking in the park"
+1. [[산책 기록]] (similarity 0.78)
+2. [[Printer fix]] (similarity 0.76)
+3. [[Coffee budget]] (similarity 0.70)
 ```
 
-Scores only order the notes of one search; they are not a measure of certainty. With only three short notes the gaps are small (0.81 against 0.79 above); on another model revision or another machine the second decimal can differ.
+Scores only order the notes of one search; they are not a measure of certainty.
 
 ## The problem
 
@@ -67,21 +67,10 @@ Download the model files once (the `hf` command comes with `huggingface_hub`; ol
 
 ```sh
 python -m pip install -U huggingface_hub
-hf download intfloat/multilingual-e5-small onnx/model.onnx onnx/tokenizer.json --revision 614241f6 --local-dir models/multilingual-e5-small
+hf download intfloat/multilingual-e5-small onnx/model.onnx onnx/tokenizer.json --local-dir models/multilingual-e5-small
 ```
 
-The folder that holds `model.onnx` and `tokenizer.json` (`models/multilingual-e5-small/onnx` here) is your `model_dir`. The tool checks only that the two files exist. It does not check a hash. `--revision 614241f6` pins the files this draft was tested with; leave it out to get the latest files.
-
-### Try the demo
-
-[`examples/demo-model.json`](examples/demo-model.json) sets `model_dir` to `models/multilingual-e5-small/onnx`, the folder the download above made. A relative `model_dir` is read from the folder you run the command in, so run these from the repository root (or put an absolute path in `model_dir`):
-
-```sh
-python -I -B vault_search.py search demo-vault "프린터 종이 걸림" --config examples/demo-model.json
-python -I -B vault_search.py search demo-vault "walking in the park" --config examples/demo-model.json
-```
-
-The first run embeds the three notes and stores the vectors in the cache folder (see `cache_dir` below). The output starts with the query and a `SEARCH_COMPLETE` line, then the three notes with their section titles and snippets; the top of this README shows the ranked lines. If the run stops with `SEARCH_MODEL_UNAVAILABLE`, `model_dir` does not point at the folder with `model.onnx` and `tokenizer.json`.
+The folder that holds `model.onnx` and `tokenizer.json` (`models/multilingual-e5-small/onnx` here) is your `model_dir`. The tool checks only that the two files exist. It does not check a hash; if you want a fixed model version, pass `--revision` to the download. This draft was tested with the files of revision `614241f6`.
 
 ## Configuration
 
@@ -255,6 +244,19 @@ Measured on one real personal vault on 2026-11-20 with the private tool this dra
 - The questions and the gold notes are personal and are not published. The numbers show what to expect, not a benchmark you can reproduce; run `recall` on your own vault to get yours.
 
 The code in this repository was then run on the same vault with the same question set and settings that copy the private tool's folder rules: all 30 questions got the same rank as before (14, 21 and 25 hits).
+
+### Compared with a plain grep baseline
+
+Measured on 2026-11-23 on the same vault and the same 30 questions, after a reader asked how much the two methods overlap. The grep baseline was fixed before running: split each question into words, strip common Korean particles, keep words of 2+ characters, and rank notes by how many distinct question words they contain (then by total matches).
+
+| | top 1 | top 5 | top 10 |
+|---|---|---|---|
+| semantic search | 14 / 30 | 21 / 30 | 25 / 30 |
+| grep baseline | 3 / 30 | 8 / 30 | 16 / 30 |
+
+Overlap per question at top 10: both found a gold note for 13, only semantic search for 12, only grep for 3, neither for 2.
+
+This is tilted against grep: the questions were written on purpose without the notes' own words. Read it as "what grep misses when you remember the meaning but not the wording", not as a keyword benchmark. The 3 grep-only questions are why this tool sits next to grep instead of replacing it.
 
 Speed, measured on a Windows 11 ARM64 laptop with Python 3.14 and onnxruntime 1.32 (CPU), warm cache: about 1.7 seconds for one question with the private tool, and about 18 seconds for the 30 recall questions in one command with this code (one scan, one model load). A cold cache is slower by the time it takes to embed the new text.
 
