@@ -4,21 +4,21 @@ Obsidian 볼트 같은 Markdown 노트 폴더를 뜻으로 찾는 로컬 검색 
 
 [English README](README.md)
 
-[`demo-vault/`](demo-vault)의 꾸민 노트 세 개로 해 봤어요. `Printer fix.md`와 `Coffee budget.md`는 영어, `산책 기록.md`는 한국어로 썼어요. 한국어로 물으면 영어 노트를, 영어로 물으면 한국어 노트를 찾아요. 아래는 [예제 돌려 보기](#예제-돌려-보기)의 명령을 실제로 돌린 출력에서 순위 줄만 남긴 것이에요.
+꾸민 노트 세 개로 해 봤어요. `Printer fix.md`와 `Coffee budget.md`는 영어, `산책 기록.md`는 한국어로 썼어요. 한국어로 물으면 영어 노트를, 영어로 물으면 한국어 노트를 찾아요(실제 출력에서 순위 줄만 남김).
 
 ```text
-$ python -I -B vault_search.py search demo-vault "프린터 종이 걸림" --config examples/demo-model.json
-1. [[Printer fix]] › Printer fix (similarity 0.81)
-2. [[산책 기록]] › 산책 기록 (similarity 0.79)
-3. [[Coffee budget]] › Coffee budget (similarity 0.68)
+$ python -I -B vault_search.py search demo-vault "프린터 종이 걸림"
+1. [[Printer fix]] (similarity 0.83)
+2. [[산책 기록]] (similarity 0.77)
+3. [[Coffee budget]] (similarity 0.69)
 
-$ python -I -B vault_search.py search demo-vault "walking in the park" --config examples/demo-model.json
-1. [[산책 기록]] › 산책 기록 (similarity 0.77)
-2. [[Printer fix]] › Printer fix (similarity 0.75)
-3. [[Coffee budget]] › Coffee budget (similarity 0.70)
+$ python -I -B vault_search.py search demo-vault "walking in the park"
+1. [[산책 기록]] (similarity 0.78)
+2. [[Printer fix]] (similarity 0.76)
+3. [[Coffee budget]] (similarity 0.70)
 ```
 
-점수는 한 번의 검색 안에서 순서를 정할 뿐이고, 얼마나 확실한지를 뜻하지 않아요. 짧은 노트 세 개뿐이라 차이가 작아요(위에서 0.81과 0.79). 모델 판이나 컴퓨터가 다르면 소수 둘째 자리가 달라질 수 있어요.
+점수는 한 번의 검색 안에서 순서를 정할 뿐이고, 얼마나 확실한지를 뜻하지 않아요.
 
 ## 문제
 
@@ -67,21 +67,10 @@ python -m pip install -r requirements.txt
 
 ```sh
 python -m pip install -U huggingface_hub
-hf download intfloat/multilingual-e5-small onnx/model.onnx onnx/tokenizer.json --revision 614241f6 --local-dir models/multilingual-e5-small
+hf download intfloat/multilingual-e5-small onnx/model.onnx onnx/tokenizer.json --local-dir models/multilingual-e5-small
 ```
 
-`model.onnx`와 `tokenizer.json`이 든 폴더(여기서는 `models/multilingual-e5-small/onnx`)가 `model_dir`이에요. 도구는 두 파일이 있는지만 보고 해시는 확인하지 않아요. `--revision 614241f6`은 이 초안을 시험한 파일로 판을 고정해요. 빼면 최신 파일을 받아요.
-
-### 예제 돌려 보기
-
-[`examples/demo-model.json`](examples/demo-model.json)은 `model_dir`을 위에서 받은 폴더 `models/multilingual-e5-small/onnx`로 정해요. 상대 경로 `model_dir`은 명령을 돌리는 폴더 기준으로 읽으니, 저장소 루트에서 돌리세요(아니면 `model_dir`에 절대 경로를 넣으세요).
-
-```sh
-python -I -B vault_search.py search demo-vault "프린터 종이 걸림" --config examples/demo-model.json
-python -I -B vault_search.py search demo-vault "walking in the park" --config examples/demo-model.json
-```
-
-처음 돌리면 노트 세 개를 임베딩해서 캐시 폴더에 둬요(아래 `cache_dir` 참고). 출력은 질문과 `SEARCH_COMPLETE` 줄로 시작하고, 이어서 노트 세 개가 섹션 제목, 글 조각과 함께 나와요. 순위 줄은 이 README 맨 위와 같아요. `SEARCH_MODEL_UNAVAILABLE`로 멈추면 `model_dir`이 `model.onnx`와 `tokenizer.json`이 든 폴더를 가리키지 않는 거예요.
+`model.onnx`와 `tokenizer.json`이 든 폴더(여기서는 `models/multilingual-e5-small/onnx`)가 `model_dir`이에요. 도구는 두 파일이 있는지만 보고 해시는 확인하지 않아요. 모델 판을 고정하려면 받을 때 `--revision`을 주세요. 이 초안은 리비전 `614241f6`의 파일로 시험했어요.
 
 ## 설정
 
@@ -255,6 +244,19 @@ RECALL_COMPLETE questions=2 top1=1/2 (50.0%) top5=2/2 (100.0%) top10=2/2 (100.0%
 - 질문과 정답 노트는 개인 자료라 공개하지 않아요. 이 숫자는 기대치일 뿐 다시 재 볼 수 있는 벤치마크가 아니에요. 내 볼트에서 `recall`로 재세요.
 
 이어서 이 저장소의 코드를 같은 볼트, 같은 질문 세트에, 비공개 도구의 폴더 규칙을 옮긴 설정으로 돌렸어요. 30개 질문 모두 순위가 같았어요(맞힘 14, 21, 25).
+
+### 단순 grep 기준선과 비교
+
+2026-11-23에 같은 볼트, 같은 질문 30개로 쟀어요. 독자가 두 방법이 얼마나 겹치는지 물어서 잰 거예요. grep 기준선은 돌리기 전에 정해 뒀어요. 질문을 낱말로 나누고, 흔한 한국어 조사를 떼고, 2글자 이상인 낱말만 남겨요. 그다음 질문 낱말이 서로 다른 것으로 몇 개 들었는지로 노트 순위를 매기고, 같으면 전체 일치 수로 가려요.
+
+| | top 1 | top 5 | top 10 |
+|---|---|---|---|
+| 뜻 검색 | 14 / 30 | 21 / 30 | 25 / 30 |
+| grep 기준선 | 3 / 30 | 8 / 30 | 16 / 30 |
+
+top 10 기준으로 질문별 겹침은 이래요. 둘 다 정답 노트를 찾은 질문이 13개, 뜻 검색만 찾은 질문이 12개, grep만 찾은 질문이 3개, 둘 다 못 찾은 질문이 2개예요.
+
+이 비교는 grep에 불리해요. 질문을 일부러 노트의 낱말 없이 썼기 때문이에요. 키워드 벤치마크가 아니라, 뜻은 기억나는데 낱말이 기억나지 않을 때 grep이 놓치는 것으로 읽으세요. grep만 찾은 질문이 3개 있어서, 이 도구는 grep을 대신하지 않고 grep 곁에 둬요.
 
 속도는 Windows 11 ARM64 노트북, Python 3.14, onnxruntime 1.32(CPU), 데운 캐시에서 쟀어요. 비공개 도구로 질문 하나에 약 1.7초, 이 코드로 recall 질문 30개를 한 명령에 약 18초(폴더 읽기와 모델 불러오기 한 번)였어요. 찬 캐시는 새 글을 임베딩하는 시간만큼 더 걸려요.
 
